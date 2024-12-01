@@ -165,12 +165,4 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
       ),
     );
   }
-
-  Widget _prizeList() {
-    return Column(
-      children: winningBetList.map((bet) {
-        return Text('Wynik zakładu: ${bet.prize}');
-      }).toList(),
-    );
-  }
 }

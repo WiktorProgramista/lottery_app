@@ -125,7 +125,7 @@ class LotteryService {
         "https://www.lotto.pl/api/lotteries/draw-prizes/single-quick-game-prizes?drawSystemId=$drawId&gameType=$lotteryName";
     try {
       final response = await http.get(Uri.parse(url));
-      developer.log("$url");
+
       // Sprawdź, czy odpowiedź jest poprawna
       if (response.statusCode == 200) {
         final List<Map<dynamic, dynamic>> data = jsonDecode(response.body)[0];

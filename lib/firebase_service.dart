@@ -107,6 +107,15 @@ class FirebaseService {
         user?.email; // Preferowana nazwa użytkownika lub e-mail
   }
 
+  Future<String?> getCurrentUserId() async {
+    User? user = _auth.currentUser; // Pobieramy bieżącego użytkownika
+    if (user != null) {
+      return user.uid; // Zwracamy UID użytkownika
+    } else {
+      return null; // Zwracamy null, jeśli użytkownik nie jest zalogowany
+    }
+  }
+
   // Funkcja wyświetlająca AlertDialog
   void alert(BuildContext context, String message) {
     showDialog(

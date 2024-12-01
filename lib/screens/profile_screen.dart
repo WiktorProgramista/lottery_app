@@ -1,5 +1,7 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:lottery_app/firebase_service.dart';
+import 'dart:developer' as developer;
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -11,6 +13,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   FirebaseService firebaseService = FirebaseService();
   String? userName;
+  String? userId;
 
   @override
   void initState() {
@@ -18,37 +21,67 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadUserName();
   }
 
+  // Ładuje nazwę użytkownika i UID
   Future<void> _loadUserName() async {
     final name = await firebaseService.getCurrentUserName();
+    final uid = await firebaseService.getCurrentUserId(); // Pobieramy UID
     setState(() {
       userName = name ?? 'Nieznany użytkownik';
+      userId = uid ?? ''; // Ustawiamy UID użytkownika
     });
+  }
+
+  // Funkcja usuwająca zakłady użytkownika
+  Future<void> usunZaklady(String uid) async {
+    if (uid.isEmpty) {
+      developer.log('Brak UID użytkownika!');
+      return;
+    }
+    final DatabaseReference betsRef =
+        FirebaseDatabase.instance.ref('users/$uid/bets');
+
+    try {
+      // Usuwanie wszystkich zakładów użytkownika
+      await betsRef.remove();
+      developer.log('Zakłady zostały pomyślnie usunięte dla użytkownika $uid');
+      setState(() {
+        // Możesz tutaj zaktualizować UI, np. wyświetlić komunikat
+      });
+    } catch (e) {
+      // Obsługa błędów
+      developer.log('Nie udało się usunąć zakładów: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-          child: ListView(
-        padding: const EdgeInsets.all(20.0),
-        children: [
-          if (userName != null)
-            Text(
-              'Witaj, $userName!',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+        child: ListView(
+          padding: const EdgeInsets.all(20.0),
+          children: [
+            if (userName != null)
+              Text(
+                'Witaj, $userName!',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          const SizedBox(height: 15.0),
-          _customButton('Wyloguj się', firebaseService.logout),
-        ],
-      )),
+            const SizedBox(height: 15.0),
+            // Przekazujemy funkcję wylogowującą się z kontekstem
+            _customButton('Wyloguj się', () => firebaseService.logout(context)),
+            const SizedBox(height: 15.0),
+            if (userId != null &&
+                userId!.isNotEmpty) // Sprawdzamy, czy mamy userId
+              _customButton('Usuń zakłady', () => usunZaklady(userId!)),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _customButton(
-      String text, Future<void> Function(BuildContext) function) {
+  Widget _customButton(String text, Function() function) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -61,7 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: ElevatedButton(
         onPressed: () async {
-          await function(context); // Wywołanie funkcji z kontekstem
+          await function(); // Wywołanie funkcji bez kontekstu
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
