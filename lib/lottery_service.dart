@@ -53,7 +53,7 @@ class LotteryService {
             if (response.statusCode == 200) {
               final List<dynamic> data = jsonDecode(response.body);
 
-              print(data);
+              developer.log(data.toString());
             } else {
               developer.log("Błąd: ${response.statusCode}");
             }

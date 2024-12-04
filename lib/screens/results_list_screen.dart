@@ -106,14 +106,9 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
                     return const Center(
                         child: Text('Losowanie się nie odbyło.'));
                   } else {
-                    // Results fetched successfully
-                    List<dynamic> drawResults = snapshot.data!;
-                    List<dynamic> basicNum = drawResults[0]['resultsJson'];
-                    List<dynamic> additionalNum =
-                        // sortowanie wyników
-                        drawResults[0]['specialResults'];
-                    basicNum.sort((a, b) => a.compareTo(b));
-                    additionalNum.sort((a, b) => a.compareTo(b));
+                    var drawResults = snapshot.data!;
+                    var basicNum = drawResults[0]['resultsJson'];
+                    var additionalNum = drawResults[0]['specialResults'];
 
                     return Column(
                       children: [
