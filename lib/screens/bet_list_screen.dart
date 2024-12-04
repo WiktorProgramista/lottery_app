@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lottery_app/firebase_service.dart';
 import 'package:lottery_app/widgets/bet_item_widget.dart';
+import 'dart:developer' as developer;
 
 class BetListScreen extends StatefulWidget {
   const BetListScreen({super.key});
@@ -68,7 +69,9 @@ class _BetListScreenState extends State<BetListScreen> {
             } else {
               final Map<dynamic, dynamic> bets = Map<dynamic, dynamic>.from(
                   snapshot.data!.snapshot.value as Map);
-              final Map<dynamic, List<dynamic>> groupedBets =
+
+              // Zmieniona funkcja grupowania, która także zawiera key (ID zakładu)
+              final Map<dynamic, List<Map<String, dynamic>>> groupedBets =
                   groupBetsByTimestamp(bets);
 
               return ListView.builder(
@@ -77,11 +80,19 @@ class _BetListScreenState extends State<BetListScreen> {
                 itemCount: groupedBets.keys.length,
                 itemBuilder: (context, index) {
                   final timestamp = groupedBets.keys.elementAt(index);
-                  final List<dynamic> betGroup = groupedBets[timestamp]!;
+                  final List<Map<String, dynamic>> betGroup =
+                      groupedBets[timestamp]!;
 
-                  return BetItemWidget(
-                    timestamp: timestamp,
-                    betGroup: betGroup,
+                  return Dismissible(
+                    key: UniqueKey(),
+                    onDismissed: (val) {
+                      // Usuwamy wszystkie zakłady z tej samej grupy
+                      removeAllBetsFromFirebase(betGroup);
+                    },
+                    child: BetItemWidget(
+                      timestamp: timestamp,
+                      betGroup: betGroup,
+                    ),
                   );
                 },
               );
@@ -92,15 +103,55 @@ class _BetListScreenState extends State<BetListScreen> {
     );
   }
 
-  Map<dynamic, List<dynamic>> groupBetsByTimestamp(Map<dynamic, dynamic> bets) {
-    final Map<dynamic, List<dynamic>> groupedBets = {};
+  // Funkcja usuwająca wszystkie zakłady z grupy
+  void removeAllBetsFromFirebase(List<Map<String, dynamic>> betGroup) async {
+    try {
+      for (var bet in betGroup) {
+        final betId = bet['betId'];
+        final ref = FirebaseDatabase.instance.ref('users/$uid/bets/$betId');
+        await ref.remove();
+      }
+    } catch (e) {
+      developer.log('Błąd usuwania zakładów z grupy: $e');
+    }
+  }
+
+  Map<dynamic, List<Map<String, dynamic>>> groupBetsByTimestamp(
+      Map<dynamic, dynamic> bets) {
+    final Map<dynamic, List<Map<String, dynamic>>> groupedBets = {};
+
     for (var entry in bets.entries) {
       final timestamp = entry.value['timestamp'];
+      final betId = entry.key; // Klucz zakładu (ID)
+
       if (!groupedBets.containsKey(timestamp)) {
         groupedBets[timestamp] = [];
       }
-      groupedBets[timestamp]!.add(entry.value);
+
+      // Dodanie zakładu z ID (entry.key)
+      groupedBets[timestamp]!.add({
+        'betId': betId, // Klucz zakładu
+        'betData': entry.value, // Dane zakładu
+      });
     }
-    return groupedBets;
+
+    // Sortowanie grup po timestamp (malejąco)
+    final sortedGroupedBets = Map.fromEntries(
+      groupedBets.entries.toList()
+        ..sort((a, b) =>
+            b.key.compareTo(a.key)), // Sortowanie po timestamp (malejąco)
+    );
+
+    // Sortowanie zakładów wewnątrz każdej grupy (malejąco)
+    for (var timestamp in sortedGroupedBets.keys) {
+      sortedGroupedBets[timestamp]!.sort((a, b) {
+        final int timestampA = a['betData']['timestamp'];
+        final int timestampB = b['betData']['timestamp'];
+        return timestampB
+            .compareTo(timestampA); // Sortowanie wewnątrz grupy malejąco
+      });
+    }
+
+    return sortedGroupedBets;
   }
 }

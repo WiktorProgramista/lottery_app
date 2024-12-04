@@ -43,7 +43,7 @@ class BetItemWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SvgPicture.asset(
-                'assets/${betGroup[0]['lotteryName'].toString().toLowerCase()}.svg',
+                'assets/${betGroup[0]['betData']['lotteryName'].toString().toLowerCase()}.svg',
                 width: 50.0,
                 height: 50.0,
               ),
@@ -62,12 +62,13 @@ class BetItemWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     BetNumberWidget(
-                        numbers: bet['basicNum'], officialNum: const []),
+                        numbers: bet['betData']['basicNum'],
+                        officialNum: const []),
                     // Sprawdzamy, czy 'additionalNum' istnieje i nie jest pustą listą
-                    if (bet.containsKey('additionalNum') &&
-                        bet['additionalNum'].isNotEmpty) ...[
+                    if (bet['betData'].containsKey('additionalNum') &&
+                        bet['betData']['additionalNum'].isNotEmpty) ...[
                       BetNumberWidget(
-                        numbers: bet['additionalNum'],
+                        numbers: bet['betData']['additionalNum'],
                         isAdditional: true,
                         officialNum: const [],
                       ),

@@ -25,11 +25,11 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
   Future<List<dynamic>> _checkIfResultsMatch() async {
     var bet = widget.betGroup[0];
     bool isDrawCompleted = await lotteryService.isDrawCompleted(
-        bet['lotteryName'], bet['nextDrawId']);
+        bet['betData']['lotteryName'], bet['betData']['nextDrawId']);
 
     if (isDrawCompleted) {
       var results = await lotteryService.drawResultsById(
-          bet['lotteryName'], bet['nextDrawId']);
+          bet['betData']['lotteryName'], bet['betData']['nextDrawId']);
       return results;
     } else {
       developer.log('Draw not completed');
@@ -51,18 +51,25 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
   Future<void> calcBetsWin() async {
     var results = await _checkIfResultsMatch();
     var isDrawComplete = await lotteryService.isDrawCompleted(
-        widget.betGroup[0]['lotteryName'], widget.betGroup[0]['nextDrawId']);
+        widget.betGroup[0]['betData']['lotteryName'],
+        widget.betGroup[0]['betData']['nextDrawId']);
     for (var bet in widget.betGroup) {
       if (isDrawComplete) {
-        var basicNum = _countHits(bet['basicNum'], results[0]['resultsJson']);
+        var basicNum =
+            _countHits(bet['betData']['basicNum'], results[0]['resultsJson']);
         var addNum = bet.containsKey('additionalNum')
             ? _countHits(bet['additionalNum'], results[0]['specialResults'])
             : 0;
         var prizeNumber = lotteryService.calculateLotteryPrizeNumber(
-            bet['lotteryName'], bet['nextDrawId'], basicNum, addNum);
+            bet['betData']['lotteryName'],
+            bet['betData']['nextDrawId'],
+            basicNum,
+            addNum);
         if (prizeNumber != "Brak nagrody") {
           var prizeValue = await lotteryService.calculatePrizeValue(
-              bet['lotteryName'], bet['nextDrawId'], prizeNumber);
+              bet['betData']['lotteryName'],
+              bet['betData']['nextDrawId'],
+              prizeNumber);
           developer.log("$prizeValue");
         }
       }
@@ -174,7 +181,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     BetNumberWidget(
-                                        numbers: bet['basicNum'],
+                                        numbers: bet['betData']['basicNum'],
                                         bgColor: Colors.white,
                                         officialNum: basicNum),
                                     if (bet.containsKey('additionalNum') &&
