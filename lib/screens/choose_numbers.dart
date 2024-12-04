@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottery_app/lottery_service.dart';
@@ -25,6 +28,7 @@ class _ChooseNumbersState extends State<ChooseNumbers> {
   bool _isBetEditing = false;
   User? user = FirebaseAuth.instance.currentUser;
   LotteryService lotteryService = LotteryService();
+  bool isChecked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +39,7 @@ class _ChooseNumbersState extends State<ChooseNumbers> {
           child: Column(
             children: [
               _listOfBets(context),
+              _randomSwitch(),
               _customButton(
                   'Dodaj zakład', () => _showBottomSheet(widget.lottery)),
               const SizedBox(height: 10.0),
@@ -413,6 +418,80 @@ class _ChooseNumbersState extends State<ChooseNumbers> {
       Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (context) => const BetListScreen()));
     }
+  }
+
+  void _addRandomNumbers() {
+    final name = widget.lottery.name;
+    final basic = widget
+        .lottery.basicNum; // Liczba podstawowych liczb (np. 6 w Lotto 6 z 49)
+    final additional = widget.lottery
+        .additionalNum; // Liczba dodatkowych liczb (np. 1 w Lotto 6 z 49)
+    final basicNumberRange = widget.lottery
+        .basicNumRange; // Zakres liczb podstawowych (np. 49 w Lotto 6 z 49)
+    final additionalNumberRange = widget.lottery
+        .additionalNumRange; // Zakres liczb dodatkowych (np. 10 w Lotto 6 z 49)
+
+    setState(() {
+      for (int i = 0; i < 5; i++) {
+        // Dodajemy 5 zakładów
+        // Generowanie podstawowych liczb
+        List<int> basicNumbers =
+            _generateRandomNumbers(basic, basicNumberRange);
+
+        // Generowanie dodatkowych liczb
+        List<int> additionalNumbers =
+            _generateRandomNumbers(additional, additionalNumberRange);
+
+        // Tworzymy nowy obiekt LotteryBet z losowymi liczbami
+        _savedBets.add(LotteryBet(
+          lotteryName: name,
+          basicNum: basicNumbers,
+          additionalNum: additionalNumbers,
+          nextDrawId:
+              1, // Możesz dostosować ten identyfikator w zależności od potrzeby
+        ));
+      }
+    });
+  }
+
+// Funkcja pomocnicza do generowania losowych liczb
+  List<int> _generateRandomNumbers(int count, int range) {
+    List<int> numbers = [];
+    Random rand = Random();
+
+    while (numbers.length < count) {
+      int randomNumber =
+          rand.nextInt(range) + 1; // Generowanie liczby w zakresie 1 - range
+      if (!numbers.contains(randomNumber)) {
+        // Sprawdzamy, czy liczba już została wybrana
+        numbers.add(randomNumber);
+      }
+    }
+
+    return numbers;
+  }
+
+  Widget _randomSwitch() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          'Chybił trafił',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.0),
+        ),
+        CupertinoSwitch(
+          value: isChecked,
+          onChanged: (bool newValue) {
+            setState(() {
+              isChecked = newValue;
+              if (isChecked) {
+                _addRandomNumbers();
+              }
+            });
+          },
+        ),
+      ],
+    );
   }
 
   Widget _customButton(String text, VoidCallback function) {
