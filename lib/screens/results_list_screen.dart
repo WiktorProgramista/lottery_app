@@ -117,7 +117,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
                     var basicNum = drawResults[0]['resultsJson'];
                     var additionalNum = drawResults[0]['specialResults'];
 
-                    return Column(
+                    return ListView(
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(8.0),
