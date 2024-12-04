@@ -107,25 +107,65 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
                         child: Text('Losowanie się nie odbyło.'));
                   } else {
                     // Results fetched successfully
-                    var drawResults = snapshot.data!;
+                    List<dynamic> drawResults = snapshot.data!;
                     List<dynamic> basicNum = drawResults[0]['resultsJson'];
                     List<dynamic> additionalNum =
+                        // sortowanie wyników
                         drawResults[0]['specialResults'];
+                    basicNum.sort((a, b) => a.compareTo(b));
+                    additionalNum.sort((a, b) => a.compareTo(b));
 
                     return Column(
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            BetNumberWidget(
-                                numbers: basicNum, officialNum: const []),
-                            if (additionalNum.isNotEmpty) ...[
-                              BetNumberWidget(
-                                  numbers: additionalNum,
-                                  isAdditional: true,
-                                  officialNum: const []),
-                            ],
-                          ],
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 30.0),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20.0),
+                                color: Colors.grey.withOpacity(0.2)),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        drawResults[0]['gameType'],
+                                        style: const TextStyle(
+                                            fontSize: 18.0,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                      Text(
+                                        "Nr losowania:${drawResults[0]['drawSystemId']}"
+                                            .toString(),
+                                        style: const TextStyle(
+                                            fontSize: 15.0,
+                                            fontWeight: FontWeight.w300),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    BetNumberWidget(
+                                        numbers: basicNum,
+                                        officialNum: const []),
+                                    if (additionalNum.isNotEmpty) ...[
+                                      BetNumberWidget(
+                                          numbers: additionalNum,
+                                          isAdditional: true,
+                                          officialNum: const []),
+                                    ],
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
