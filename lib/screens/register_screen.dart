@@ -37,6 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(height: 15.0),
             TextField(
+              obscureText: true,
               controller: _password,
               decoration: InputDecoration(
                   fillColor: Colors.blue.shade300,
@@ -47,6 +48,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(height: 15.0),
             TextField(
+              obscureText: true,
               controller: _confirmPassword,
               decoration: InputDecoration(
                   fillColor: Colors.blue.shade300,

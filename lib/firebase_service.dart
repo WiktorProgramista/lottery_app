@@ -25,7 +25,8 @@ class FirebaseService {
       // Zwrócenie UID użytkownika po udanej rejestracji
       if (context.mounted) {
         alert(context, 'Pomyślnie zarejestrowano konto.');
-        Navigator.pop(context);
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()));
       }
       return userCredential.user?.uid;
     } on FirebaseAuthException catch (e) {

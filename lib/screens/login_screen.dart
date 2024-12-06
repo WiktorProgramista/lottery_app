@@ -37,6 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 15.0),
             TextField(
+              obscureText: true,
               controller: _password,
               decoration: InputDecoration(
                   fillColor: Colors.blue.shade300,
@@ -50,6 +51,11 @@ class _LoginScreenState extends State<LoginScreen> {
               if (_email.text.isNotEmpty && _password.text.isNotEmpty) {
                 _firebaseService.loginUser(
                     _email.text, _password.text, context);
+              } else {
+                if (context.mounted) {
+                  _firebaseService.alert(
+                      context, 'Login i hasło nie mogą być puste');
+                }
               }
             }),
             const SizedBox(height: 30.0),
