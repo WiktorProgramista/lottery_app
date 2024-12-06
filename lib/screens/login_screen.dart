@@ -58,13 +58,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 }
               }
             }),
-            const SizedBox(height: 30.0),
-            _customButton('Zarejestruj się', () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const RegisterScreen()));
-            })
+            TextButton(
+                child: const Text('Zarejestruj się'),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const RegisterScreen()));
+                })
           ],
         ),
       ),
