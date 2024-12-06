@@ -184,10 +184,13 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
                                         numbers: bet['betData']['basicNum'],
                                         bgColor: Colors.white,
                                         officialNum: basicNum),
-                                    if (bet.containsKey('additionalNum') &&
-                                        bet['additionalNum'].isNotEmpty) ...[
+                                    if (bet['betData']
+                                            .containsKey('additionalNum') &&
+                                        bet['betData']['additionalNum']
+                                            .isNotEmpty) ...[
                                       BetNumberWidget(
-                                          numbers: bet['additionalNum'],
+                                          numbers: bet['betData']
+                                              ['additionalNum'],
                                           isAdditional: true,
                                           bgColor: Colors.white,
                                           officialNum: additionalNum),

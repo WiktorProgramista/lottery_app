@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottery_app/firebase_service.dart';
 import 'package:lottery_app/lottery_service.dart';
 import 'package:lottery_app/objects/lottery.dart';
 import 'package:lottery_app/objects/lottery_bet.dart';
@@ -28,6 +29,7 @@ class _ChooseNumbersState extends State<ChooseNumbers> {
   bool _isBetEditing = false;
   User? user = FirebaseAuth.instance.currentUser;
   LotteryService lotteryService = LotteryService();
+  FirebaseService firebaseService = FirebaseService();
   bool isChecked = false;
 
   @override
@@ -222,8 +224,10 @@ class _ChooseNumbersState extends State<ChooseNumbers> {
                     _selectedAdditionalNum.value.toSet().toList();
               } else {
                 // Dodaj komunikat lub zablokuj wybór, jeśli wybrano już 2 liczby
-                showAlert(
-                    context, "Możesz wybrać tylko dwie liczby dodatkowe.");
+                if (context.mounted) {
+                  firebaseService.alert(
+                      context, "Możesz wybrać tylko dwie liczby dodatkowe.");
+                }
               }
             },
             style: ElevatedButton.styleFrom(
@@ -343,11 +347,14 @@ class _ChooseNumbersState extends State<ChooseNumbers> {
         _selectedBasicNum.value.clear();
         _selectedAdditionalNum.value.clear();
         _isBetEditing = false;
+        Navigator.pop(context);
       } else {
-        showAlert(context, "Musisz wybrać poprawną liczbę liczb.");
+        if (context.mounted) {
+          firebaseService.alert(
+              context, "Musisz wybrać poprawną liczbę liczb.");
+        }
       }
     });
-    Navigator.pop(context);
   }
 
   Future<void> _updateNextDrawId() async {
@@ -369,7 +376,9 @@ class _ChooseNumbersState extends State<ChooseNumbers> {
       if (user == null) {
         // Używaj alertu, jeśli użytkownik nie jest zalogowany
         if (mounted) {
-          showAlert(context, "Użytkownik nie jest zalogowany.");
+          if (context.mounted) {
+            firebaseService.alert(context, "Użytkownik nie jest zalogowany.");
+          }
         }
         return;
       }
@@ -401,7 +410,7 @@ class _ChooseNumbersState extends State<ChooseNumbers> {
 
       // Powiadomienie o sukcesie
       if (mounted) {
-        showAlert(context, "Zakłady zostały zapisane.");
+        firebaseService.alert(context, "Zakłady zostały zapisane.");
       }
 
       // Zamknij aktualny ekran, jeśli operacja się powiedzie
@@ -411,7 +420,8 @@ class _ChooseNumbersState extends State<ChooseNumbers> {
     } catch (error) {
       // Obsługa błędów w przypadku problemów z bazą danych
       if (mounted) {
-        showAlert(context, "Błąd podczas zapisywania zakładów: $error");
+        firebaseService.alert(
+            context, "Błąd podczas zapisywania zakładów: $error");
       }
     }
     if (mounted) {
@@ -527,25 +537,6 @@ class _ChooseNumbersState extends State<ChooseNumbers> {
           height: 23.0,
         ),
       ),
-    );
-  }
-
-  void showAlert(BuildContext context, String text) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          content: Text(text),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Zamknij'),
-            ),
-          ],
-        );
-      },
     );
   }
 }

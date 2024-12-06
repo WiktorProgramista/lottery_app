@@ -23,6 +23,10 @@ class FirebaseService {
       await prefs.setBool('isLoggedIn', true);
 
       // Zwrócenie UID użytkownika po udanej rejestracji
+      if (context.mounted) {
+        alert(context, 'Pomyślnie zarejestrowano konto.');
+        Navigator.pop(context);
+      }
       return userCredential.user?.uid;
     } on FirebaseAuthException catch (e) {
       // Obsługa błędów, które mogą wystąpić przy rejestracji
